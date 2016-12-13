@@ -1,0 +1,26 @@
+.definition {
+    border-bottom: 1px solid black;
+    margin: 20px;
+}
+
+.definition:last-child {
+    border-bottom: 0px;
+}
+
+.quote {
+    background-color: #eceeef;
+    border-radius: .3rem;
+}
+
+.super {
+    vertical-align: super;
+    font-size: smaller;
+}
+
+.synonym {
+    color: blue;
+}
+
+.search-box {
+    padding-top: 20px;
+}
