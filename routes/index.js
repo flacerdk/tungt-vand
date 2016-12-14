@@ -8,7 +8,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/ddo', (req, res) => {
-  const options = {query: req.query.query, select: req.query.select}
+  const options = req.query
   parsePageEntry(options)
     .then(data => {
       res.send(data)

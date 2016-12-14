@@ -1,17 +1,8 @@
 'use strict'
 
 var cheerio = require('cheerio')
-// var fs = require('fs')
-// var body
-// fs.readFile('./ord.html', 'utf8', (err, data) => {
-//   if (err) {
-//     console.log(err)
-//   }
-//   body = data
-// })
-
-// var $ = cheerio.load(body)
 var fetch = require('node-fetch')
+var url = require('url')
 
 function pageElement(options) {
   const that = {}
@@ -30,8 +21,8 @@ function title(body) {
   })
   that.parse = () => {
     const title = {}
-    title.title = that.element.find('.match').text()
-    title.attributes = that.element.find('.tekstmedium').text()
+    title.title = that.element.find('.match').first().text()
+    title.attributes = that.element.find('.tekstmedium').first().text()
     return title
   }
   return that.parse()
@@ -46,14 +37,12 @@ function pronunciations(body) {
     const pronunciations = []
     const pronunciationsSoup = that.element.children()
 
-    let item
+    let item = {text: ''}
     pronunciationsSoup.each((i, vTag) => {
       const v = that.$(vTag)
       if (v.attr('class') === 'dividerDouble') {
         item.text = item.text.replace(/^\s+/, '').replace(/\s+$/, '')
         pronunciations.push(item)
-        item = {text: ''}
-      } else if (i === 0) {
         item = {text: ''}
       }
       item.text += v.text() +  ' '
@@ -70,10 +59,16 @@ function pronunciations(body) {
 }
 
 function definitions(body, options) {
-  const that = pageElement({
+  let that = pageElement({
     body,
     element: (options && options.element) || '#content-betydninger .definition',
   })
+  if (that.element.length === 0) {
+    that = pageElement({
+      body,
+      element: '.definition',
+    })
+  }
 
   that.parse = () => {
     const definitions = []
@@ -99,9 +94,12 @@ function definitions(body, options) {
         item.grammar = grammar.text().split('\xa0 ')
       }
 
-      const quotes = parent.find('.citat').each((i, e) => e.innerText)
+      const quotes = parent.find('.citat')
       if (quotes.length > 0) {
-        item.quotes = quotes.text()
+        item.quotes = []
+        quotes.each((i, e) => {
+          item.quotes.push(e.children[0].data)
+        })
       }
 
       const examples = parent.find('.definitionBox :contains(Eksempler)')
@@ -135,6 +133,29 @@ function inflection(body) {
   return that.parse()
 }
 
+function suggestions(body) {
+  const that = pageElement({
+    body,
+    element: '.searchResultBox',
+  })
+
+  that.parse = () => {
+    that.element.find('.arrow-mini').replaceWith('→')
+    const items = []
+    that.element.find('a').each((i, eTag) => {
+      const e = that.$(eTag)
+      const item = {}
+      item.link = url.parse(e.attr('href')).query
+      item.text = e.text()
+        .replace(/^\s+/, '')
+        .replace(/\s+$/, '')
+      items.push(item)
+    })
+    return items
+  }
+  return that.parse()
+}
+
 function parsePage(body) {
   return {
     title: title(body),
@@ -145,11 +166,15 @@ function parsePage(body) {
       withHeader: true,
     }),
     inflection: inflection(body),
+    suggestions: suggestions(body),
   }
 }
 
 function parsePageEntry(options) {
-  const queryString = 'query=' + (options.query || '') + '&select=' + (options.select || '')
+  const query = options.query ? '&query=' + options.query : ''
+  const select = options.select ? '&select=' + options.select : ''
+  const mselect = options.mselect ? '&mselect=' + options.mselect : ''
+  const queryString = query + select + mselect
   return fetch(`http://ordnet.dk/ddo/ordbog?${queryString}`)
     .then((response) => {
       return response.text()
