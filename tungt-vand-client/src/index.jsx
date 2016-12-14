@@ -8,6 +8,7 @@ import MainPage from './components/MainPage'
 import PronunciationBox from './components/PronunciationBox'
 import DefinitionBox from './components/DefinitionBox'
 import SearchBox from './components/SearchBox'
+import SuggestionBar from './components/SuggestionBar'
 
 function renderEntry(entry) {
   const title = (<h1>{entry.title.title}</h1>)
@@ -37,10 +38,16 @@ class Page extends React.Component {
 
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
+    this.handleChooseItem = this.handleChooseItem.bind(this)
   }
 
   handleChange(event) {
     this.setState({query: event.target.value})
+  }
+
+  handleChooseItem(link) {
+    fetchAndParse({query: link})
+      .then((r) => this.setState({ data: JSON.parse(r), query: '' }))
   }
 
   handleSubmit(event) {
@@ -51,11 +58,16 @@ class Page extends React.Component {
 
   render() {
     let leftColumn
+    let suggestions = ''
     if (Object.keys(this.state.data).length > 0) {
       leftColumn = renderEntry(this.state.data)
+      suggestions = (<SuggestionBar
+                       suggestions={this.state.data.suggestions}
+                       onClick={this.handleChooseItem}
+                     />)
     } else {
       leftColumn = (<MainPage />)
-     }
+    }
      return (
        <Grid fluid>
          <Col xs={8}>
@@ -67,6 +79,7 @@ class Page extends React.Component {
              query={this.state.query}
              handleSubmit={this.handleSubmit}
            />
+           {suggestions}
          </Col>
        </Grid>
      )

@@ -1,7 +1,7 @@
 import React from 'react'
 
 export default function PronunciationBox(props) {
-  let inflection = ''
+  let inflection = null
   if (props.inflection !== '') {
     inflection = (
       <div id="bojning">
@@ -9,7 +9,7 @@ export default function PronunciationBox(props) {
       </div>
     )
   }
-  let pronunciations = ''
+  let pronunciations = null
   if (props.pronunciations.length > 0) {
     const items = props.pronunciations.map(e => (
       <li>
