@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "DEBUG=express:* node --harmony_destructuring ./bin/www"
+    "start": "DEBUG=express:* node ./bin/www"
   },
   "dependencies": {
     "body-parser": "~1.15.2",

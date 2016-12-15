@@ -9,6 +9,11 @@ function pageElement({ body, element }) {
   const that = {}
   that.$ = cheerio.load(body)
   that.element = that.$(element)
+  const superSpan = that.element.find('.super')
+  superSpan.each((i, eTag) => {
+    const e = that.$(eTag)
+    e.replaceWith(`(${e.text()})`)
+  })
   that.parse = () => {
     return null
   }
