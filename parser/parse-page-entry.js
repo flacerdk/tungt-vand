@@ -5,10 +5,10 @@ var fetch = require('node-fetch')
 var url = require('url')
 var querystring = require('querystring')
 
-function pageElement(options) {
+function pageElement({ body, element }) {
   const that = {}
-  that.$ = cheerio.load(options.body)
-  that.element = that.$(options.element)
+  that.$ = cheerio.load(body)
+  that.element = that.$(element)
   that.parse = () => {
     return null
   }
@@ -59,10 +59,10 @@ function pronunciations(body) {
   return that.parse()
 }
 
-function parseDefinitions(body, options) {
+function parseDefinitions(body, { element, withHeader = false }) {
   let that = pageElement({
     body,
-    element: (options && options.element) || '#content-betydninger .definition',
+    element: element || '#content-betydninger .definition',
   })
   that.parse = () => {
     const definitions = []
@@ -101,8 +101,7 @@ function parseDefinitions(body, options) {
         item.examples = examples.next().text().split('\xa0 ')
       }
 
-      if (typeof options !== 'undefined' &&
-          'withHeader' in options) {
+      if (withHeader) {
         const headerTitle = that.$(parent.prevAll('.definitionBox')[0]).text()
               .replace(/\s+/gm, ' ')
               .replace(/^\s+/, '')
@@ -151,7 +150,7 @@ function suggestions(body) {
 }
 
 function parsePage(body) {
-  let definitions = parseDefinitions(body)
+  let definitions = parseDefinitions(body, {})
   let fasteUdtryk = []
   if (definitions.length === 0) {
     definitions = parseDefinitions(body, {
@@ -173,11 +172,8 @@ function parsePage(body) {
   }
 }
 
-function parsePageEntry(options) {
-  const query = options.query ? '&query=' + options.query : ''
-  const select = options.select ? '&select=' + options.select : ''
-  const mselect = options.mselect ? '&mselect=' + options.mselect : ''
-  const queryString = query + select + mselect
+function parsePageEntry(query) {
+  const queryString = querystring.stringify(query)
   return fetch(`http://ordnet.dk/ddo/ordbog?${queryString}`)
     .then((response) => {
       return response.text()
