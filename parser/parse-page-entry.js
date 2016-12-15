@@ -3,6 +3,7 @@
 var cheerio = require('cheerio')
 var fetch = require('node-fetch')
 var url = require('url')
+var querystring = require('querystring')
 
 function pageElement(options) {
   const that = {}
@@ -58,18 +59,11 @@ function pronunciations(body) {
   return that.parse()
 }
 
-function definitions(body, options) {
+function parseDefinitions(body, options) {
   let that = pageElement({
     body,
     element: (options && options.element) || '#content-betydninger .definition',
   })
-  if (that.element.length === 0) {
-    that = pageElement({
-      body,
-      element: '.definition',
-    })
-  }
-
   that.parse = () => {
     const definitions = []
     that.element.each((i, vTag) => {
@@ -145,7 +139,7 @@ function suggestions(body) {
     that.element.find('a').each((i, eTag) => {
       const e = that.$(eTag)
       const item = {}
-      item.link = url.parse(e.attr('href')).query
+      item.link = querystring.parse(url.parse(e.attr('href')).query)
       item.text = e.text()
         .replace(/^\s+/, '')
         .replace(/\s+$/, '')
@@ -157,14 +151,23 @@ function suggestions(body) {
 }
 
 function parsePage(body) {
+  let definitions = parseDefinitions(body)
+  let fasteUdtryk = []
+  if (definitions.length === 0) {
+    definitions = parseDefinitions(body, {
+      element: '.definition'
+    })
+  } else {
+    fasteUdtryk = parseDefinitions(body, {
+      element: '#content-faste-udtryk .definition',
+      withHeader: true,
+    })
+  }
   return {
     title: title(body),
     pronunciations: pronunciations(body),
-    definitions: definitions(body),
-    faste_udtryk: definitions(body, {
-      element: '#content-faste-udtryk .definition',
-      withHeader: true,
-    }),
+    definitions,
+    fasteUdtryk,
     inflection: inflection(body),
     suggestions: suggestions(body),
   }
@@ -188,7 +191,6 @@ module.exports = {
   pageElement,
   title,
   pronunciations,
-  definitions,
   inflection,
   parsePage,
   parsePageEntry,

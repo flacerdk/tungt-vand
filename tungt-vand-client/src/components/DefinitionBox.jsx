@@ -16,11 +16,11 @@ function buildExampleList(items, className, renderFunction) {
 export default function DefinitionBox(props) {
   let definitions = null
   if (props.definitions.length > 0) {
-    const items = props.definitions.map(e => {
-      const grammar = buildExampleList(e.grammar, 'small', (g) => (<em>{g}</em>))
-      const examples = buildExampleList(e.examples, 'small', (g) => (<em>{g}</em>))
-      const synonyms = buildExampleList(e.synonyms, 'synonym', (g) => (<em>{g.text}</em>))
-      const quotes = buildExampleList(e.quotes, 'quotes', (g) => (<em>{g}</em>))
+    const items = props.definitions.map((e) => {
+      const grammar = buildExampleList(e.grammar, 'small', g => (<em>{g} | </em>))
+      const examples = buildExampleList(e.examples, 'small', g => (<em>{g} | </em>))
+      const synonyms = buildExampleList(e.synonyms, 'synonym', g => (<em>{g.text} | </em>))
+      const quotes = buildExampleList(e.quotes, 'quotes', g => (<em>{g} | </em>))
 
       return (
         <div className="definition">
@@ -35,7 +35,7 @@ export default function DefinitionBox(props) {
     })
     definitions = (
       <div className="definitions">
-        <h2>Betydninger</h2>
+        <h2>{props.header}</h2>
         {items}
       </div>
     )
