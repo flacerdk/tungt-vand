@@ -54,7 +54,7 @@ function pronunciations(body) {
       item.text += v.text() +  ' '
       const audio = v.find('audio a').attr('href')
       if (typeof audio !== 'undefined') {
-        item.transcription = v.find('audio a').attr('href')
+        item.audio = v.find('audio a').attr('href')
       }
     })
     item.text = item.text.replace(/^\s+/, '').replace(/\s+$/, '')
