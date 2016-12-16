@@ -1,6 +1,8 @@
+'use strict'
+
 var express = require('express')
 var router = express.Router()
-var parsePageEntry = require('../parser/parse-page-entry').parsePageEntry
+var parsePageEntry = require('../parser/parse-page-entry')
 
 /* GET home page. */
 router.get('/', (req, res) => {

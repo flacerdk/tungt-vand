@@ -5,75 +5,37 @@ var fetch = require('node-fetch')
 var url = require('url')
 var querystring = require('querystring')
 
-function pageElement({ body, element }) {
-  const that = {}
-  that.$ = cheerio.load(body)
-  that.element = that.$(element)
-  const superSpan = that.element.find('.super')
-  superSpan.each((i, eTag) => {
-    const e = that.$(eTag)
-    e.replaceWith(`(${e.text()})`)
-  })
-  that.parse = () => {
-    return null
+class Page {
+  constructor({ body }) {
+    this.page = {}
+    this.$ = cheerio.load(body)
+    this.pageElement = this.pageElement.bind(this)
   }
-  return that
-}
 
-function title(body) {
-  const that = pageElement({
-    body: body,
-    element: '.definitionBoxTop'
-  })
-  that.parse = () => {
+  pageElement(selector) {
+    const element = this.$(selector)
+    const superSpan = element.find('.super')
+    superSpan.each((i, eTag) => {
+      const e = this.$(eTag)
+      e.replaceWith(`(${e.text()})`)
+    })
+    return element
+  }
+
+  parseTitle() {
+    const element = this.pageElement('.definitionBoxTop')
     const title = {}
-    title.title = that.element.find('.match').first().text()
-    title.attributes = that.element.find('.tekstmedium').first().text()
+    title.title = element.find('.match').first().text()
+    title.attributes = element.find('.tekstmedium').first().text()
     return title
   }
-  return that.parse()
-}
 
-function pronunciations(body) {
-  const that = pageElement({
-    body,
-    element: '#id-udt .tekstmedium',
-  })
-  that.parse = () => {
-    const pronunciations = []
-    const pronunciationsSoup = that.element.children()
-
-    let item = {text: ''}
-    pronunciationsSoup.each((i, vTag) => {
-      const v = that.$(vTag)
-      if (v.attr('class') === 'dividerDouble') {
-        item.text = item.text.replace(/^\s+/, '').replace(/\s+$/, '')
-        pronunciations.push(item)
-        item = {text: ''}
-      }
-      item.text += v.text() +  ' '
-      const audio = v.find('audio a').attr('href')
-      if (typeof audio !== 'undefined') {
-        item.audio = v.find('audio a').attr('href')
-      }
-    })
-    item.text = item.text.replace(/^\s+/, '').replace(/\s+$/, '')
-    pronunciations.push(item)
-    return pronunciations
-  }
-  return that.parse()
-}
-
-function parseDefinitions(body, { element, withHeader = false }) {
-  let that = pageElement({
-    body,
-    element: element || '#content-betydninger .definition',
-  })
-  that.parse = () => {
+  parseDefinitions({ selector, withHeader = false }) {
+    let element = this.pageElement(selector || '#content-betydninger .definition')
     const definitions = []
-    that.element.each((i, vTag) => {
+    element.each((i, vTag) => {
       const item = {}
-      const v = that.$(vTag)
+      const v = this.$(vTag)
       const parent = v.parents('.definitionIndent')
       item.definition = parent.find('.definition').text()
       const synonyms = parent.find('span:contains(Synonym)').next().find('a')
@@ -107,41 +69,56 @@ function parseDefinitions(body, { element, withHeader = false }) {
       }
 
       if (withHeader) {
-        const headerTitle = that.$(parent.prevAll('.definitionBox')[0]).text()
-              .replace(/\s+/gm, ' ')
-              .replace(/^\s+/, '')
-              .replace(/\s+$/, '')
+        const headerTitle = this.$(parent.prevAll('.definitionBox')[0]).text()
+          .replace(/\s+/gm, ' ')
+          .replace(/^\s+/, '')
+          .replace(/\s+$/, '')
         item.title = headerTitle
       }
     })
     return definitions
   }
 
-  return that.parse()
-}
+  parsePronunciations() {
+    const element = this.pageElement('#id-udt .tekstmedium')
 
-function inflection(body) {
-  const that = pageElement({
-    body,
-    element: '#id-boj .tekstmedium',
-  })
-  that.parse = () => {
-    return that.element.text() || ''
+    if (element.length === 0) {
+      return []
+    }
+
+    const pronunciations = []
+    const pronunciationsSoup = element.children()
+
+    let item = {text: ''}
+    pronunciationsSoup.each((i, vTag) => {
+      const v = this.$(vTag)
+      if (v.attr('class') === 'dividerDouble') {
+        item.text = item.text.replace(/^\s+/, '').replace(/\s+$/, '')
+        pronunciations.push(item)
+        item = {text: ''}
+      }
+      item.text += v.text() +  ' '
+      const audio = v.find('audio a').attr('href')
+      if (typeof audio !== 'undefined') {
+        item.audio = v.find('audio a').attr('href')
+      }
+    })
+    item.text = item.text.replace(/^\s+/, '').replace(/\s+$/, '')
+    pronunciations.push(item)
+    return pronunciations
   }
-  return that.parse()
-}
 
-function suggestions(body) {
-  const that = pageElement({
-    body,
-    element: '.searchResultBox',
-  })
+  parseInflection() {
+    const element = this.pageElement('#id-boj .tekstmedium')
+    return element.text() || ''
+  }
 
-  that.parse = () => {
-    that.element.find('.arrow-mini').replaceWith('→')
+  parseSuggestions() {
+    const element = this.pageElement('.searchResultBox')
+    element.find('.arrow-mini').replaceWith('→')
     const items = []
-    that.element.find('a').each((i, eTag) => {
-      const e = that.$(eTag)
+    element.find('a').each((i, eTag) => {
+      const e = this.$(eTag)
       const item = {}
       item.link = querystring.parse(url.parse(e.attr('href')).query)
       item.text = e.text()
@@ -151,29 +128,29 @@ function suggestions(body) {
     })
     return items
   }
-  return that.parse()
-}
 
-function parsePage(body) {
-  let definitions = parseDefinitions(body, {})
-  let fasteUdtryk = []
-  if (definitions.length === 0) {
-    definitions = parseDefinitions(body, {
-      element: '.definition'
-    })
-  } else {
-    fasteUdtryk = parseDefinitions(body, {
-      element: '#content-faste-udtryk .definition',
-      withHeader: true,
-    })
-  }
-  return {
-    title: title(body),
-    pronunciations: pronunciations(body),
-    definitions,
-    fasteUdtryk,
-    inflection: inflection(body),
-    suggestions: suggestions(body),
+  parse() {
+    let definitions = this.parseDefinitions({})
+    let fasteUdtryk = []
+    if (definitions.length === 0) {
+      definitions = this.parseDefinitions({
+        selector: '.definition'
+      })
+    } else {
+      fasteUdtryk = this.parseDefinitions({
+        selector: '#content-faste-udtryk .definition',
+        withHeader: true,
+      })
+    }
+
+    return {
+      title: this.parseTitle(),
+      pronunciations: this.parsePronunciations(),
+      definitions,
+      fasteUdtryk,
+      inflection: this.parseInflection(),
+      suggestions: this.parseSuggestions(),
+    }
   }
 }
 
@@ -184,15 +161,9 @@ function parsePageEntry(query) {
       return response.text()
     })
     .then((data) => {
-      return parsePage(data)
+      const page = new Page({ body: data })
+      return page.parse()
     })
 }
 
-module.exports = {
-  pageElement,
-  title,
-  pronunciations,
-  inflection,
-  parsePage,
-  parsePageEntry,
-}
+module.exports = parsePageEntry
