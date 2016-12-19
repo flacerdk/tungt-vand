@@ -24,3 +24,23 @@
 .search-box {
     padding-top: 20px;
 }
+
+.example {
+    display: inline;
+    border-left: 1px solid black;
+    padding: 0 3px 0 3px;
+}
+
+.example:first-child {
+    border-left: 0;
+    padding: 0 3px 0 0;
+}
+
+.transcription {
+    display: inline;
+    margin-left: 5px;
+}
+
+.details {
+    display: inline;
+}

@@ -5,6 +5,11 @@ var fetch = require('node-fetch')
 var url = require('url')
 var querystring = require('querystring')
 
+const removeSpaces = text => text
+      .replace(/\s+/gm, ' ')
+      .replace(/^\s+/, '')
+      .replace(/\s+$/, '')
+
 class Page {
   constructor({ body }) {
     this.page = {}
@@ -69,10 +74,7 @@ class Page {
       }
 
       if (withHeader) {
-        const headerTitle = this.$(parent.prevAll('.definitionBox')[0]).text()
-          .replace(/\s+/gm, ' ')
-          .replace(/^\s+/, '')
-          .replace(/\s+$/, '')
+        const headerTitle = removeSpaces(this.$(parent.prevAll('.definitionBox')[0]).text())
         item.title = headerTitle
       }
     })
@@ -89,21 +91,30 @@ class Page {
     const pronunciations = []
     const pronunciationsSoup = element.children()
 
-    let item = {text: ''}
+    let item = {transcription: '', details: ''}
     pronunciationsSoup.each((i, vTag) => {
       const v = this.$(vTag)
       if (v.attr('class') === 'dividerDouble') {
-        item.text = item.text.replace(/^\s+/, '').replace(/\s+$/, '')
+        item.transcription = removeSpaces(item.transcription)
+        item.details = removeSpaces(item.details)
         pronunciations.push(item)
-        item = {text: ''}
+        item = {transcription: '', details: ''}
+        const next = v.next()
+        if (next.attr('class') === 'diskret') {
+          item.details = next.text()
+        }
+      } else if (v.attr('class') === 'lydskrift') {
+        item.transcription += v.text() + ' '
+      } else {
+        return null
       }
-      item.text += v.text() +  ' '
       const audio = v.find('audio a').attr('href')
       if (typeof audio !== 'undefined') {
         item.audio = v.find('audio a').attr('href')
       }
     })
-    item.text = item.text.replace(/^\s+/, '').replace(/\s+$/, '')
+    item.details = removeSpaces(item.details)
+    item.transcription = removeSpaces(item.transcription)
     pronunciations.push(item)
     return pronunciations
   }
@@ -114,16 +125,14 @@ class Page {
   }
 
   parseSuggestions() {
-    const element = this.pageElement('.searchResultBox')
+    const element = this.pageElement('.searchResultBox').first()
     element.find('.arrow-mini').replaceWith('→')
     const items = []
     element.find('a').each((i, eTag) => {
       const e = this.$(eTag)
       const item = {}
       item.link = querystring.parse(url.parse(e.attr('href')).query)
-      item.text = e.text()
-        .replace(/^\s+/, '')
-        .replace(/\s+$/, '')
+      item.text = removeSpaces(e.text())
       items.push(item)
     })
     return items
