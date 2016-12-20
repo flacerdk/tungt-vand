@@ -4,7 +4,6 @@ body {
 
 .definition-column {
     padding: 5px 5px;
-    background-color: #ffffff;
 }
 
 .definition {
@@ -18,8 +17,6 @@ body {
 
 .title {
     padding: 10px 15px;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
     font-size: xx-large;
     color: #85144b;
     background-color: #ffdc00;
