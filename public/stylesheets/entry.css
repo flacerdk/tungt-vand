@@ -50,6 +50,10 @@ body {
     color: #59729f;
 }
 
+.pronunciation {
+    padding: 5px 5px;
+}
+
 .details {
     display: inline;
 }
