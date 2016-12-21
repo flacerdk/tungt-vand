@@ -12,10 +12,12 @@ router.get('/', (req, res) => {
 router.get('/ddo', (req, res) => {
   const options = req.query
   parsePageEntry(options)
-    .then(data => {
+    .then((data) => {
       res.send(data)
     })
-    .catch(ex => console.log(ex))
+    .catch((err) => {
+      res.status(404).send({error: err})
+    })
 })
 
 module.exports = router;

@@ -167,6 +167,9 @@ function parsePageEntry(query) {
   const queryString = querystring.stringify(query)
   return fetch(`http://ordnet.dk/ddo/ordbog?${queryString}`)
     .then((response) => {
+      if (response.status >= 300) {
+        return Promise.reject(new Error(response.statusText))
+      }
       return response.text()
     })
     .then((data) => {
