@@ -63,9 +63,10 @@ body {
 }
 
 .header {
-    color: #aaaaaa;
+    color: #85144b;
     margin-bottom: 10px;
     font-size: large;
+    padding-left: 5px;
 }
 
 .inflection {
@@ -89,4 +90,8 @@ body {
 
 .entry-definition {
     padding: 3px 5px;
+}
+
+.error-panel {
+    padding-top: 10px;
 }

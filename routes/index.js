@@ -2,7 +2,7 @@
 
 var express = require('express')
 var router = express.Router()
-var parsePageEntry = require('../parser/parse-page-entry')
+var parsePageEntry = require('../parser/parse-page-entry').parsePageEntry
 
 /* GET home page. */
 router.get('/', (req, res) => {

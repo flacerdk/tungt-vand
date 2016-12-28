@@ -22,7 +22,7 @@ class Page {
     const superSpan = element.find('.super')
     superSpan.each((i, eTag) => {
       const e = this.$(eTag)
-      e.replaceWith(`(${e.text()})`)
+      e.replaceWith(` (${e.text()})`)
     })
     return element
   }
@@ -178,4 +178,7 @@ function parsePageEntry(query) {
     })
 }
 
-module.exports = parsePageEntry
+module.exports = {
+  parsePageEntry,
+  Page
+}
