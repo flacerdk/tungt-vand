@@ -1,8 +1,9 @@
 'use strict'
 
-var express = require('express')
-var router = express.Router()
-var parser = require('../lib/parser')
+import express from 'express'
+import parser from '../lib/parser'
+
+const router = express.Router()
 
 router.get('/', (req, res) => {
   res.render('index', { title: 'Express' });
