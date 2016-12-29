@@ -16,7 +16,7 @@ router.get('/ddo', (req, res) => {
       res.send(data)
     })
     .catch((err) => {
-      res.status(404).send({error: err})
+      res.status(404).send({error: err.toString()})
     })
 })
 

@@ -164,6 +164,9 @@ class Page {
 }
 
 function parsePageEntry(query) {
+  if (typeof query.query === 'undefined' || query.query === '') {
+    return Promise.reject(new Error("empty query"))
+  }
   const queryString = querystring.stringify(query)
   return fetch(`http://ordnet.dk/ddo/ordbog?${queryString}`)
     .then((response) => {
