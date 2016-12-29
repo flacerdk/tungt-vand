@@ -1,25 +1,25 @@
 'use strict'
 
-var express = require('express')
-var path = require('path')
-var logger = require('morgan')
-var cookieParser = require('cookie-parser')
-var bodyParser = require('body-parser')
-var favicon = require('serve-favicon')
+import express from 'express'
+import path from 'path'
+import logger from 'morgan'
+import cookieParser from 'cookie-parser'
+import bodyParser from 'body-parser'
+import favicon from 'serve-favicon'
 
-var index = require('./routes/index')
+import index from './routes/index'
 
-var app = express()
+const app = express()
 
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 
-app.use(favicon(__dirname + '/public/images/favicon.ico'))
+app.use(favicon(path.join(__dirname, '..', '/public/images/favicon.ico')))
 
 app.use(logger('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, '..', 'public')))
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*")
@@ -43,4 +43,4 @@ app.use(function(err, req, res) {
   res.render('error')
 })
 
-module.exports = app
+export { app as default }

@@ -1,9 +1,9 @@
 'use strict'
 
-var cheerio = require('cheerio')
-var fetch = require('node-fetch')
-var url = require('url')
-var querystring = require('querystring')
+import cheerio from 'cheerio'
+import fetch from 'node-fetch'
+import url from 'url'
+import querystring from 'querystring'
 
 const removeSpaces = text => text
       .replace(/\s+/gm, ' ')
@@ -181,7 +181,7 @@ function pageEntry(query) {
     })
 }
 
-module.exports = {
+export {
   pageEntry,
   Page
 }

@@ -1,7 +1,7 @@
 'use strict'
 
 import express from 'express'
-import parser from '../lib/parser'
+import { pageEntry } from '../lib/parser'
 
 const router = express.Router()
 
@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
 
 router.get('/ddo', (req, res) => {
   const options = req.query
-  parser.pageEntry(options)
+  pageEntry(options)
     .then((data) => {
       res.send(data)
     })
@@ -20,4 +20,4 @@ router.get('/ddo', (req, res) => {
     })
 })
 
-module.exports = router
+export { router as default }
