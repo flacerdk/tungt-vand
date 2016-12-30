@@ -37,23 +37,20 @@ class Page {
 
   parseDefinitions({ selector, withHeader = false }) {
     let element = this.pageElement(selector || '#content-betydninger .definition')
-    const definitions = []
-    element.each((i, vTag) => {
+    const definitions = element.map((i, vTag) => {
       const item = {}
       const v = this.$(vTag)
       const parent = v.parents('.definitionIndent')
       item.definition = parent.find('.definition').text()
       const synonyms = parent.find('span:contains(Synonym)').next().find('a')
       if (synonyms.length > 0) {
-        item.synonyms = []
-        synonyms.each((i, e) => {
+        item.synonyms = synonyms.map((i, e) => {
           const synonym = {}
           synonym.text = e.children[0].data
           synonym.link = e.attribs.href
-          item.synonyms.push(synonym)
-        })
+          return synonym
+        }).get()
       }
-      definitions.push(item)
 
       const grammar = parent.find('.grammatik .inlineList')
       if (grammar.length > 0) {
@@ -62,10 +59,9 @@ class Page {
 
       const quotes = parent.find('.citat')
       if (quotes.length > 0) {
-        item.quotes = []
-        quotes.each((i, e) => {
-          item.quotes.push(e.children[0].data)
-        })
+        item.quotes = quotes.map((i, e) => {
+          return e.children[0].data
+        }).get()
       }
 
       const examples = parent.find('.definitionBox :contains(Eksempler)')
@@ -77,7 +73,8 @@ class Page {
         const headerTitle = removeSpaces(this.$(parent.prevAll('.definitionBox')[0]).text())
         item.title = headerTitle
       }
-    })
+      return item
+    }).get()
     return definitions
   }
 
@@ -88,10 +85,10 @@ class Page {
       return []
     }
 
-    const pronunciations = []
     const pronunciationsSoup = element.children()
 
     let item = {transcription: '', details: ''}
+    const pronunciations = []
     pronunciationsSoup.each((i, vTag) => {
       const v = this.$(vTag)
       if (v.attr('class') === 'dividerDouble') {
@@ -127,14 +124,13 @@ class Page {
   parseSuggestions() {
     const element = this.pageElement('.searchResultBox').first()
     element.find('.arrow-mini').replaceWith('→')
-    const items = []
-    element.find('a').each((i, eTag) => {
+    const items = element.find('a').map((i, eTag) => {
       const e = this.$(eTag)
       const item = {}
       item.link = querystring.parse(url.parse(e.attr('href')).query)
       item.text = removeSpaces(e.text())
-      items.push(item)
-    })
+      return item
+    }).get()
     return items
   }
 
