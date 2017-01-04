@@ -1,0 +1,10 @@
+{
+  "plugins": ["node"],
+  "env": {
+    "node": true
+  },
+  "extends": ["eslint:recommended", "es2015"],
+  "parserOptions": {
+    "sourceType": "module"
+  }
+}
