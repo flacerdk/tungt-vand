@@ -40,6 +40,7 @@ class Page {
     const definitions = element.map((i, vTag) => {
       const item = {}
       const v = this.$(vTag)
+      item.id = v.parents('.definitionBox').first().attr('id')
       const parent = v.parents('.definitionIndent')
       item.definition = parent.find('.definition').text()
       const synonyms = parent.find('span:contains(Synonym)').next().find('a')
