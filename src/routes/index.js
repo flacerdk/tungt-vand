@@ -6,7 +6,7 @@ import { pageEntry } from '../lib/parser'
 const router = express.Router()
 
 router.get('/', (req, res) => {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'DDO' });
 })
 
 router.get('/ddo', (req, res) => {
