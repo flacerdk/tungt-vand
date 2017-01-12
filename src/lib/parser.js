@@ -119,7 +119,11 @@ class Page {
 
   parseInflection() {
     const element = this.pageElement('#id-boj .tekstmedium')
-    return element.text() || ''
+    let text = ''
+    if (element.length > 0) {
+      text = removeSpaces(element[0].children[0].data)
+    }
+    return text
   }
 
   parseSuggestions() {
